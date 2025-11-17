@@ -11,8 +11,9 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
+from datetime import datetime
 
 # Example schemas (replace with your own):
 
@@ -38,11 +39,38 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Real estate app schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Property(BaseModel):
+    """
+    Properties listed by the business
+    Collection name: "property"
+    """
+    title: str
+    description: Optional[str] = None
+    price: float = Field(..., ge=0, description="Listing price")
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    bedrooms: int = Field(..., ge=0)
+    bathrooms: float = Field(..., ge=0)
+    area_sqft: int = Field(..., ge=0)
+    property_type: str = Field(..., description="House, Apartment, Condo, Townhouse, Land")
+    images: List[str] = Field(default_factory=list)
+    amenities: List[str] = Field(default_factory=list)
+    featured: bool = False
+    status: str = Field("For Sale", description="For Sale or For Rent")
+    listed_at: Optional[datetime] = None
+
+class Inquiry(BaseModel):
+    """
+    Customer inquiries about a property or general contact
+    Collection name: "inquiry"
+    """
+    name: str
+    email: str
+    phone: Optional[str] = None
+    message: str
+    property_id: Optional[str] = Field(None, description="Related property id if applicable")
+    created_at: Optional[datetime] = None
